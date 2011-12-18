@@ -53,11 +53,11 @@ if [[ -n $TM_BUILDSTYLE ]]; then
 	# accept the active build style in the project.
 	if [[ -d $PROJECT_FILE ]] && xcodebuild -project "$PROJECT_FILE" -list | awk 'display == "yes" { sub(/^[ \t]+/, ""); print }; /Build (styles|Configurations)/ { display = "yes" }' | grep -F "${BUILD_STYLE}" &>/dev/null; then
 		BUILD_STYLE="-$STYLEARGNAME $BUILD_STYLE";
-	else
-		BUILD_STYLE="-active$STYLEARGNAME"
+	# else
+	# 	BUILD_STYLE="-active$STYLEARGNAME"
 	fi
-else
-	BUILD_STYLE="-active$STYLEARGNAME"
+# else
+# 	BUILD_STYLE="-active$STYLEARGNAME"
 fi
 
 #
@@ -68,4 +68,9 @@ OBJROOT=$("${TM_BUNDLE_SUPPORT}"/bin/find_objroot.rb)
 echo $OBJROOT
 
 export PROJECT_FILE
+
+# echo "xcodebuild ${PROJECT_FILE:+-project '$PROJECT_FILE'} ${TM_TARGET:+-target $TM_TARGET} $BUILD_STYLE $XCODE_BUILD_VERB ${OBJROOT:+'OBJROOT=$OBJROOT'} 2>&1| ruby -- '${TM_BUNDLE_SUPPORT}/bin/format_build_output.rb'"
+# 
+# exit 0
+
 xcodebuild ${PROJECT_FILE:+-project "$PROJECT_FILE"} ${TM_TARGET:+-target $TM_TARGET} $BUILD_STYLE $XCODE_BUILD_VERB ${OBJROOT:+"OBJROOT=$OBJROOT"} 2>&1| ruby -- "${TM_BUNDLE_SUPPORT}/bin/format_build_output.rb"

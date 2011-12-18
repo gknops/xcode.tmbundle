@@ -7,11 +7,16 @@ class Xcode
 	def Xcode.supports_configurations?
 		
 		unless defined? @@xcode2dot1_or_later
-			version_str = %x{ xcodebuild 2>/dev/null -version }
-			version_match = /DevToolsCore-(\d+).\d+;/.match(version_str)
-			@@xcode2dot1_or_later = (version_match != nil &&
-										version_match.length > 0 &&
-										version_match[1].to_i >= 620)
+			# version_str = %x{ xcodebuild 2>/dev/null -version }
+			# version_match = /DevToolsCore-(\d+).\d+;/.match(version_str)
+			# @@xcode2dot1_or_later = (version_match != nil &&
+			# 							version_match.length > 0 &&
+			# 							version_match[1].to_i >= 620)
+			# 
+			# Let's assume nobody is still using anything THAT old,
+			# and the above test fails with Xcode 4
+			# 
+			@@xcode2dot1_or_later = 1
 		end
 
 		@@xcode2dot1_or_later

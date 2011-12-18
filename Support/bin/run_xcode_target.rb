@@ -144,7 +144,17 @@ class Xcode
 					end
         end
       end
-			fs_path=fs_path+subpath
+			
+			#
+			# 111028: this next line seems to do the wrong thing for some 
+			# projects, try and make it smarter.
+			# 
+			# fs_path=fs_path+subpath
+			
+			if fs_path != nil and subpath != nil and File.exist?(fs_path+subpath) then
+        fs_path=fs_path+subpath
+      end
+			
       fs_path
     end
     
@@ -184,6 +194,12 @@ class Xcode
         next unless obj['isa'] == 'PBXFileReference'
         next unless obj['path'].include? '/' + basename or obj['path'] == basename
         path = path_for_fileref(key) + '/' + obj['path']
+				
+				# puts "<br>1: "+ obj['path']
+				# puts "<br>key: "+ key
+				# puts "<br>pf: "+ path_for_fileref(key)
+				# puts "<br>2: "+ path + "<br>"
+				
         break
       end
       path
@@ -270,8 +286,10 @@ class Xcode
 
           # If we have a block, feed it stdout and stderr data
           if block_given? and Xcode.supports_configurations? then
-            executable = "./#{file_path}/Contents/MacOS/#{configuration_named(@project.active_configuration_name).product_name}"
-
+						# executable = "./#{file_path}/Contents/MacOS/#{configuration_named(@project.active_configuration_name).product_name}"
+						exname=ENV['XC_TARGET_NAME']
+            executable = "./#{file_path}/Contents/MacOS/#{exname}"
+						
             cmd = %Q{#{setup_cmd} #{e_sh executable}}
             block.call(:start, file_path )
 
@@ -372,13 +390,21 @@ class Xcode
           begin
             type = :HTML
             line = htmlize(line.chomp)
-            line = line.gsub(/^(([\w.\/ \+])+):(\d+):((\d+):)?(?!\d+\.\d+)/) do |string|
+						# puts "<br>line: " + line + "<br>\n"
+						line = line.gsub(/^\d+\-\d+\-\d+\s+\S+\s+\S+\s\/[A-Za-z0-9_+\-\/]+\//,'')
+						# puts "<br>line2: " + line + "<br>\n"
+						line = line.gsub(/^(([\w.\/ \+])+):(\d+):((\d+):)?(?!\d+\.\d+)/) do |string|
               # the negative lookahead suffix prevents matching the NSLog time prefix
             
+							# puts "string1: " + $1 + "<br>\n"
+							
+
               path        = @project.path_for_basename($1)
               line_number = $3
               column      = $4.nil? ? '' : "&column=#{$5}"
               
+							# puts "path: " + path + "<br>\n"
+							
               if path != nil and File.exist?(path) then
                 %Q{<a href="txmt://open?url=file://#{e_url(path)}&line=#{line_number}#{column}">#{string}</a>}
               else
